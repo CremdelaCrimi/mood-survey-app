@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mood & Health Survey</title>
+    <style>
+        .slider-container {
+            margin: 20px 0;
+        }
+
+        .slider-label {
+            margin-bottom: 5px;
+            display: block;
+        }
+
+        .slider-value {
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Mood & Health Survey</h1>
+    
+    <form id="surveyForm">
+        <div class="slider-container">
+            <label class="slider-label" for="mood">How would you rate your current mood?</label>
+            <input type="range" id="mood" name="mood" min="1" max="10" value="5" oninput="updateValue('moodValue', this.value)">
+            <span class="slider-value" id="moodValue">5</span>/10
+        </div>
+
+        <div class="slider-container">
+            <label class="slider-label" for="energy">How energized or tired do you feel?</label>
+            <input type="range" id="energy" name="energy" min="1" max="10" value="5" oninput="updateValue('energyValue', this.value)">
+            <span class="slider-value" id="energyValue">5</span>/10
+        </div>
+
+        <div class="slider-container">
+            <label class="slider-label" for="stress">How stressed are you?</label>
+            <input type="range" id="stress" name="stress" min="1" max="10" value="5" oninput="updateValue('stressValue', this.value)">
+            <span class="slider-value" id="stressValue">5</span>/10
+        </div>
+
+        <div class="slider-container">
+            <label class="slider-label" for="awareness">Were you able to focus on tasks?</label>
+            <input type="range" id="awareness" name="awareness" min="1" max="10" value="5" oninput="updateValue('awarenessValue', this.value)">
+            <span class="slider-value" id="awarenessValue">5</span>/10
+        </div>
+
+        <div class="slider-container">
+            <label class="slider-label" for="stomach">How was your stomach feeling today?</label>
+            <input type="range" id="stomach" name="stomach" min="1" max="10" value="5" oninput="updateValue('stomachValue', this.value)">
+            <span class="slider-value" id="stomachValue">5</span>/10
+        </div>
+
+        <div class="slider-container">
+            <label class="slider-label" for="trigger">Any specific event that affected your mood?</label><br>
+            <textarea id="trigger" name="trigger" rows="4" cols="50"></textarea><br><br>
+        </div>
+
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        // Function to update the displayed value of the slider
+        function updateValue(elementId, value) {
+            document.getElementById(elementId).innerText = value;
+        }
+
+        // Function to determine time of day (morning, afternoon, or night)
+        function getTimeFrame() {
+            const currentHour = new Date().getHours();
+
+            if (currentHour >= 6 && currentHour < 12) {
+                return 'Morning';
+            } else if (currentHour >= 12 && currentHour < 18) {
+                return 'Afternoon';
+            } else {
+                return 'Night';
+            }
+        }
+
+        // Store form data in localStorage and redirect to the finished page
+        document.getElementById('surveyForm').addEventListener('submit', function(event) {
+            event.preventDefault();  // Prevent the page from refreshing
+
+            // Get form data
+            const mood = document.getElementById('mood').value;
+            const energy = document.getElementById('energy').value;
+            const stress = document.getElementById('stress').value;
+            const awareness = document.getElementById('awareness').value;
+            const stomach = document.getElementById('stomach').value;
+            const trigger = document.getElementById('trigger').value;
+            const timestamp = new Date().toLocaleString();
+            const timeFrame = getTimeFrame();
+
+            // Create a new survey response object
+            const newSurveyResponse = {
+                mood: parseInt(mood),
+                energy: parseInt(energy),
+                stress: parseInt(stress),
+                awareness: parseInt(awareness),
+                stomach: parseInt(stomach),
+                trigger: trigger,
+                timestamp: timestamp,
+                timeFrame: timeFrame
+            };
+
+            // Retrieve existing survey responses from localStorage
+            let surveyResponses = JSON.parse(localStorage.getItem('surveyResponses')) || [];
+
+            // Add the new survey response to the array
+            surveyResponses.push(newSurveyResponse);
+
+            // Store the updated array back in localStorage
+            localStorage.setItem('surveyResponses', JSON.stringify(surveyResponses));
+
+            // Redirect to the finished page
+            window.location.href = 'finished.html';
+        });
+    </script>
+</body>
+</html>
+
