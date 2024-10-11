@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Survey Results</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        /* Mobile-first responsive design */
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        h1 {
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .filter-container {
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        /* Make the charts container responsive */
+        .chart-container {
+            width: 100%;
+            max-width: 600px; /* Max width for larger screens */
+            margin: 0 auto;
+            padding-top: 20px;
+        }
+
+        /* Adjust font sizes for mobile */
+        p {
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        label {
+            font-size: 18px;
+        }
+
+        select {
+            padding: 10px;
+            font-size: 16px;
+        }
+
+        /* Spacing adjustments for mobile */
+        canvas {
+            max-width: 100%;
+            height: auto;
+        }
+
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 20px;
+            }
+
+            p {
+                font-size: 16px;
+            }
+
+            label {
+                font-size: 16px;
+            }
+
+            select {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <h1>Your Survey Results</h1>
+
+    <!-- Filter by Time of Day -->
+    <div class="filter-container">
+        <label for="timeFilter">Filter by time of day:</label>
+        <select id="timeFilter" onchange="updateCharts()">
+            <option value="all">All</option>
+            <option value="Morning">Morning</option>
+            <option value="Afternoon">Afternoon</option>
+            <option value="Night">Night</option>
+        </select>
+    </div>
+
+    <p>Average Mood: <span id="averageMood"></span></p>
+    <p>Average Energy: <span id="averageEnergy"></span></p>
+    <p>Average Stress: <span id="averageStress"></span></p>
+    <p>Average Awareness: <span id="averageAwareness"></span></p>
+    <p>Average Stomach: <span id="averageStomach"></span></p>
+
+    <!-- Responsive chart containers -->
+    <div class="chart-container">
+        <canvas id="moodChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="energyChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="stressChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="awarenessChart"></canvas>
+    </div>
+
+    <div class="chart-container">
+        <canvas id="stomachChart"></canvas>
+    </div>
+
+    <script>
+        // Retrieve the survey responses from localStorage
+        const surveyResponses = JSON.parse(localStorage.getItem('surveyResponses')) || [];
+
+        function calculateAverages(filteredResponses) {
+            if (filteredResponses.length > 0) {
+                const totalMood = filteredResponses.reduce((acc, response) => acc + response.mood, 0);
+                const totalEnergy = filteredResponses.reduce((acc, response) => acc + response.energy, 0);
+                const totalStress = filteredResponses.reduce((acc, response) => acc + response.stress, 0);
+                const totalAwareness = filteredResponses.reduce((acc, response) => acc + response.awareness, 0);
+                const totalStomach = filteredResponses.reduce((acc, response) => acc + response.stomach, 0);
+
+                const averageMood = (totalMood / filteredResponses.length).toFixed(2);
+                const averageEnergy = (totalEnergy / filteredResponses.length).toFixed(2);
+                const averageStress = (totalStress / filteredResponses.length).toFixed(2);
+                const averageAwareness = (totalAwareness / filteredResponses.length).toFixed(2);
+                const averageStomach = (totalStomach / filteredResponses.length).toFixed(2);
+
+                document.getElementById('averageMood').textContent = averageMood;
+                document.getElementById('averageEnergy').textContent = averageEnergy;
+                document.getElementById('averageStress').textContent = averageStress;
+                document.getElementById('averageAwareness').textContent = averageAwareness;
+                document.getElementById('averageStomach').textContent = averageStomach;
+            } else {
+                document.getElementById('averageMood').textContent = 'No data available';
+                document.getElementById('averageEnergy').textContent = 'No data available';
+                document.getElementById('averageStress').textContent = 'No data available';
+                document.getElementById('averageAwareness').textContent = 'No data available';
+                document.getElementById('averageStomach').textContent = 'No data available';
+            }
+        }
+
+        function filterResponses(timeFrame) {
+            if (timeFrame === 'all') {
+                return surveyResponses;
+            } else {
+                return surveyResponses.filter(response => response.timeFrame === timeFrame);
+            }
+        }
+
+        function updateCharts() {
+            const timeFrame = document.getElementById('timeFilter').value;
+            const filteredResponses = filterResponses(timeFrame);
+
+            calculateAverages(filteredResponses);
+
+            // Mood chart
+            const moodData = {
+                labels: filteredResponses.map(response => response.timestamp),
+                datasets: [{
+                    label: 'Mood Rating',
+                    data: filteredResponses.map(response => response.mood),
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const moodChart = new Chart(
+                document.getElementById('moodChart'),
+                {
+                    type: 'line',
+                    data: moodData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                }
+            );
+
+            // Energy chart
+            const energyData = {
+                labels: filteredResponses.map(response => response.timestamp),
+                datasets: [{
+                    label: 'Energy Level',
+                    data: filteredResponses.map(response => response.energy),
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const energyChart = new Chart(
+                document.getElementById('energyChart'),
+                {
+                    type: 'line',
+                    data: energyData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                }
+            );
+
+            // Stress chart
+            const stressData = {
+                labels: filteredResponses.map(response => response.timestamp),
+                datasets: [{
+                    label: 'Stress Level',
+                    data: filteredResponses.map(response => response.stress),
+                    backgroundColor: 'rgba(153, 102, 255, 0.2)',
+                    borderColor: 'rgba(153, 102, 255, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const stressChart = new Chart(
+                document.getElementById('stressChart'),
+                {
+                    type: 'line',
+                    data: stressData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                }
+            );
+
+            // Awareness chart
+            const awarenessData = {
+                labels: filteredResponses.map(response => response.timestamp),
+                datasets: [{
+                    label: 'Awareness Level',
+                    data: filteredResponses.map(response => response.awareness),
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const awarenessChart = new Chart(
+                document.getElementById('awarenessChart'),
+                {
+                    type: 'line',
+                    data: awarenessData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                }
+            );
+
+            // Stomach chart
+            const stomachData = {
+                labels: filteredResponses.map(response => response.timestamp),
+                datasets: [{
+                    label: 'Stomach Level',
+                    data: filteredResponses.map(response => response.stomach),
+                    backgroundColor: 'rgba(255, 159, 64, 0.2)',
+                    borderColor: 'rgba(255, 159, 64, 1)',
+                    borderWidth: 1
+                }]
+            };
+
+            const stomachChart = new Chart(
+                document.getElementById('stomachChart'),
+                {
+                    type: 'line',
+                    data: stomachData,
+                    options: {
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                max: 10
+                            }
+                        }
+                    }
+                }
+            );
+        }
+
+        updateCharts(); // Initial load for all data
+    </script>
+</body>
+</html>
