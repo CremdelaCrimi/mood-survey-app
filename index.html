@@ -91,7 +91,7 @@
             const awareness = document.getElementById('awareness').value;
             const stomach = document.getElementById('stomach').value;
             const trigger = document.getElementById('trigger').value;
-            const timestamp = new Date().toLocaleString();
+            const timestamp = new Date().toISOString(); // Use ISO string for consistency
             const timeFrame = getTimeFrame();
 
             // Create a new survey response object
@@ -121,4 +121,3 @@
     </script>
 </body>
 </html>
-
